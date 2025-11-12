@@ -1,0 +1,12 @@
+[project]
+name = "sales-flow-analytics"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "aiohttp>=3.13.2",
+    "fastapi>=0.121.1",
+    "pandas>=2.3.3",
+    "uvicorn>=0.38.0",
+]
