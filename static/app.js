@@ -13,11 +13,42 @@ const topDaysTableBody = document.getElementById('top-days-table-body');
 let salesChart = null;
 let movingAverageChart = null;
 
-const today = new Date();
-const defaultStartDate = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());;
+function getTodayDate() {
+    return new Date().toISOString().split('T')[0];
+}
 
-startDateInput.valueAsDate = defaultStartDate;
-endDateInput.valueAsDate = today;
+function setupDateConstraints() {
+    const today = getTodayDate();
+    
+    startDateInput.setAttribute('max', today);
+    endDateInput.setAttribute('max', today);
+    
+    startDateInput.addEventListener('change', function() {
+        if (this.value) {
+            endDateInput.setAttribute('min', this.value);
+        }
+    });
+    
+    endDateInput.addEventListener('change', function() {
+        if (this.value && startDateInput.value > this.value) {
+            startDateInput.value = this.value;
+        }
+    });
+}
+
+const today = new Date();
+const defaultStartDate = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
+
+function initializeDates() {
+    setupDateConstraints();
+    
+    startDateInput.valueAsDate = defaultStartDate;
+    endDateInput.valueAsDate = today;
+    
+    if (startDateInput.value) {
+        endDateInput.setAttribute('min', startDateInput.value);
+    }
+}
 
 fetchButton.addEventListener('click', fetchData);
 
@@ -35,6 +66,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const mainContent = document.getElementById('main-content');
     const errorMessage = document.getElementById('error-message');
 
+    initializeDates();
+
     if (fetchButton) {
         fetchButton.addEventListener('click', function() {
             loadingOverlay.classList.remove('hidden');
@@ -51,21 +84,21 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 });
 
-
 async function fetchData() {
     const startDate = startDateInput.value;
     const endDate = endDateInput.value;
     
-    if (!startDate || !endDate) {
-        showError('Please select both start and end dates.');
+    const today = getTodayDate();
+    if (endDate > today) {
+        showError('Дата конца не может быть позже сегодняшнего дня');
         return;
     }
     
-    if (new Date(startDate) > new Date(endDate)) {
-        showError('Start date cannot be after end date.');
+    if (startDate > endDate) {
+        showError('Дата начала не может быть позже даты конца');
         return;
     }
-    
+       
     loadingIndicator.classList.remove('hidden');
     errorMessage.classList.add('hidden');
     summarySection.classList.add('hidden');
@@ -74,10 +107,14 @@ async function fetchData() {
         const response = await fetch(`http://localhost:8000/sales/summary?start_date=${startDate}&end_date=${endDate}`);
         
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
         
         const data = await response.json();
+        
+        if (data.error) {
+          throw new Error(data.error);
+        }
         
         loadingIndicator.classList.add('hidden');
         
@@ -220,7 +257,7 @@ function createCharts(data) {
                     beginAtZero: true,
                     ticks: {
                         callback: function(value) {
-                            return '$' + value.toLocaleString();
+                            return value.toLocaleString();
                         }
                     }
                 }
@@ -231,7 +268,6 @@ function createCharts(data) {
 
 function sortTable(tableId, column) {
     const sortableHeaders = document.querySelectorAll('th[data-sort]');
-    console.log(123)
     sortableHeaders.forEach(header => {
         header.style.cursor = 'pointer';
         header.addEventListener('click', function() {
@@ -262,8 +298,8 @@ function sortTable(tableId, column) {
                         break;
                     case 'sales':
                     case 'moving_average':
-                        aValue = parseFloat(aCell.replace('$', '')) || 0;
-                        bValue = parseFloat(bCell.replace('$', '')) || 0;
+                        aValue = parseFloat(aCell) || 0;
+                        bValue = parseFloat(bCell) || 0;
                         break;
                     default:
                         aValue = aCell.toLowerCase();
