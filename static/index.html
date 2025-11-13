@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container" id="main-content">
+        <h1>Sales Dashboard</h1>
+        <div class="charts-container">
+          <div class="form-container">
+              <div class="form-group">
+                  <label for="start_date">Дата начала:</label>
+                  <input type="date" id="start_date" required>
+              </div>
+              <div class="form-group">
+                  <label for="end_date">Дата конца:</label>
+                  <input type="date" id="end_date" required>
+              </div>
+              <button id="fetch-data">Получить данные</button>
+          </div>
+          
+          <div id="error-message" class="error hidden"></div>
+          
+          <div id="summary" class="summary hidden">
+              <h2>Summary</h2>
+              <p><strong>Период:</strong> <span id="period"></span></p>
+              <p><strong>Всего дней:</strong> <span id="total-days"></span></p>
+              <p><strong>Всего продано:</strong> <span id="total-sales"></span> ₽</p>
+          </div>
+        </div>
+        <div class="charts-container">
+            <div class="chart-wrapper">
+                <h3>Продано в день</h3>
+                <canvas id="sales-chart"></canvas>
+            </div>
+            <div class="chart-wrapper">
+                <h3>Скользящее среднее</h3>
+                <canvas id="moving-average-chart"></canvas>
+            </div>
+        </div>
+        
+        <div class="tables-container">
+            <div class="table-wrapper">
+                <h3>Ежедневные продажи</h3>
+                <table id="sales-table">
+                    <thead>
+                        <tr>
+                            <th data-sort="date">Date</th>
+                            <th data-sort="sales">Sales</th>
+                            <th data-sort="moving_average">Moving Average</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sales-table-body">
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="table-wrapper">
+                <h3>Лучшие дни по продажам</h3>
+                <table id="top-days-table">
+                    <thead>
+                        <tr>
+                            <th data-sort="date">Date</th>
+                            <th data-sort="sales">Sales</th>
+                        </tr>
+                    </thead>
+                    <tbody id="top-days-table-body">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="loading" class="spinner-overlay hidden">
+        <div class="spinner-container">
+            <div class="spinner"></div>
+            <div class="loading-text">Loading data...</div>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
