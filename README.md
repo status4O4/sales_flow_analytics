@@ -1,34 +1,5 @@
 # Система анализа продаж
-
-## Структура проекта
-
-### 1. SQL запросы
-- Структура базы данных
-- Требования к аналитическому запросу
-- Ожидаемый формат результатов
-
-### 2. Python Backend
-- Настройка FastAPI приложения
-- Реализация эндпоинта
-- Функции обработки данных
-- Обработка ошибок
-
-### 3. Frontend
-- HTML структура
-- JavaScript функции
-- CSS стили
-- Реализация графиков
-
-### 4. Google Apps Script + Sheets
-- Формулы в таблицах
-- Функция Apps Script
-- Функции автоматизации
-
----
-
 ## 1. SQL запрос
-
-### Структура базы данных
 ```sql
 WITH monthly_city_sales AS (
     SELECT 
@@ -40,12 +11,12 @@ WITH monthly_city_sales AS (
             PARTITION BY DATE_TRUNC('month', s.sale_date) 
             ORDER BY SUM(s.amount) DESC
         ) AS city_rank
-    FROM sales S
-    INNER JOIN users U ON S.user_id = U.id
-    WHERE S.sale_date IS NOT NULL
-      AND U.city IS NOT NULL
+    FROM sales s
+    INNER JOIN users u ON s.user_id = u.id
+    WHERE s.sale_date IS NOT NULL
+      AND u.city IS NOT NULL
     --  AND s.sale_date BETWEEN :start_date AND :end_date -- Если нужно по дате выбирать
-    GROUP BY sale_month, U.city
+    GROUP BY sale_month, u.city
 )
 SELECT 
     sale_month,
@@ -54,8 +25,10 @@ SELECT
     monthly_total_sales,
     city_rank
 FROM monthly_city_sales
-    WHERE city_rank < 4
-  ORDER BY sale_month;```
+WHERE city_rank < 4
+ORDER BY sale_month;
+```
+
 ---
 
 ## 2. Python Backend
@@ -86,7 +59,7 @@ PRODUCTS_COUNT_TEST_DATA=5000
 SALES_COUNT_TEST_DATA=3000000
 ```
 
-3. Запустите сервер:
+4. Запустите сервер:
 ```bash
 python app.py
 ```
@@ -101,7 +74,7 @@ python app.py
 ## 4. Google Apps Script + Sheets
 
 ### Формулы в таблицах
-```exel
+```excel
 // A1 - QUERY
 =QUERY(A:C; "SELECT A, SUM(B) WHERE C >= date '"&TEXT(TODAY()-30;"yyyy-mm-dd")&"' GROUP BY A"; 1)
 
